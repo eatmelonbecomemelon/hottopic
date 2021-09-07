@@ -1,0 +1,11 @@
+Title = "hottopic"
+WeiboHotRunHour = ["15","16"]
+LogLevel = "DEBUG"
+[MongoDB]
+[MongoDB.'1']
+    IP = "127.0.0.1"
+    Port = "27017"
+    User = ""
+    PassWord= ""
+    DBName = "hottopic"
+
