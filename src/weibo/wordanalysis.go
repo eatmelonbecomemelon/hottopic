@@ -2,9 +2,10 @@ package weibo
 
 import (
 	cm "common"
-	"gojieba"
+	"github.com/yanyiwu/gojieba"
 	"mgo/bson"
 	"mongoplus"
+	"strings"
 )
 
 type WordInfo struct {
@@ -13,9 +14,11 @@ type WordInfo struct {
 	Count int
 }
 
+var gojiebaEntity *gojieba.Jieba
+
 func sentenceParse(sentence string) (words []string) {
-	x := gojieba.NewJieba()
-	return x.CutAll(sentence)
+	use_hmm := true
+	return gojiebaEntity.Cut(sentence, use_hmm)
 }
 
 func (w *WordInfo) UpdateCurrentCount() {
@@ -24,9 +27,11 @@ func (w *WordInfo) UpdateCurrentCount() {
 	data, err := mongoplus.MgoEntry.QueryOne(hotwordCol, filter)
 	if err != nil {
 		cm.Error(err.Error())
-		return
+		if !strings.Contains(err.Error(), "not found") {
+			return
+		}
 	}
-	if len(data) == 1 {
+	if len(data) > 1 {
 		currentCnt = cm.MustInt(data["count"])
 	}
 	w.Count = currentCnt + w.Count

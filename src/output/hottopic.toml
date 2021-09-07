@@ -1,5 +1,5 @@
 Title = "hottopic"
-WeiboHotRunHour = ["15","16"]
+WeiboHotRunHour = ["13","14"]
 LogLevel = "DEBUG"
 [MongoDB]
 [MongoDB.'1']

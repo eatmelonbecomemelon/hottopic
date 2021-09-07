@@ -3,6 +3,7 @@ package weibo
 import (
 	cm "common"
 	"encoding/json"
+	"fmt"
 	"httpplus"
 	"mongoplus"
 	"time"
@@ -21,10 +22,11 @@ type HotInfo struct {
 }
 type HotInfoRecord struct {
 	HotInfo
-	Date string `json:"date"`
+	Hour string `json:"hour"`
 }
 
 const dayLayout = "2006-01-02"
+const hourLayout = "2006-01-02_15"
 const weibohostspotCol = "weibohostspot"
 const hotwordCol = "hotword"
 
@@ -35,22 +37,24 @@ func GetWeiboHotTopic() {
 		cm.Error(err.Error())
 		return
 	}
+
 	var respData weiboResp
 	err = json.Unmarshal(resp, &respData)
 	if err != nil {
 		cm.Error(err.Error())
 		return
 	}
-	date := time.Now().Format(dayLayout)
+	hour := time.Now().Format(hourLayout)
 	var recodes []HotInfoRecord
 	var record = HotInfoRecord{
-		Date: date,
+		Hour: hour,
 	}
 	var allWords = make(map[string]WordInfo)
 	var month = time.Now().Format("2006-01")
 	for _, one := range respData.NewsList {
 		record.HotInfo = one
 		words := sentenceParse(record.HotWord)
+		fmt.Println("words", words)
 		recodes = append(recodes, record)
 		for _, one := range words {
 			wordInfo, ok := allWords[one]
@@ -59,10 +63,11 @@ func GetWeiboHotTopic() {
 				wordInfo.Month = month
 			}
 			wordInfo.Count++
+			allWords[one] = wordInfo
 		}
 	}
 
-	ret := mongoplus.InsertRecords(recodes, "weibohostspot")
+	ret := mongoplus.InsertRecords(recodes, weibohostspotCol)
 	if ret != cm.Success {
 		cm.Error(ret)
 		return
@@ -71,6 +76,6 @@ func GetWeiboHotTopic() {
 		wordInfo.UpdateCurrentCount()
 	}
 	cm.Info("Update records", len(recodes))
-	cm.Info("Update word", len(recodes))
+	cm.Info("Update word", len(allWords))
 
 }

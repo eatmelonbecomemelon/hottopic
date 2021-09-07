@@ -31,7 +31,7 @@ func LoadConfig() {
 	configPath := flag.String("f", "./output/hottopic.toml", "configfile")
 	cm.Debug("cfg path :", *configPath)
 	if *configPath == "" {
-		*configPath = "./output/vocvtdock.toml"
+		*configPath = "./output/hottopic.toml"
 	}
 
 	if _, err := toml.DecodeFile(*configPath, &SysConfig); err != nil {
