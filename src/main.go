@@ -21,7 +21,7 @@ func runCronTabJob() {
 	cm.Info("START")
 	crontab := cron.New()
 	for _, one := range cf.SysConfig.WeiboHotRunHour {
-		crontab.AddFunc("49 "+one+" * * *", weibo.GetWeiboHotTopic)
+		crontab.AddFunc("00 "+one+" * * *", weibo.GetWeiboHotTopic)
 	}
 	crontab.Start()
 }

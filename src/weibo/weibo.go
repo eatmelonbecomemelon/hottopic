@@ -3,7 +3,6 @@ package weibo
 import (
 	cm "common"
 	"encoding/json"
-	"fmt"
 	"httpplus"
 	"mongoplus"
 	"time"
@@ -22,13 +21,14 @@ type HotInfo struct {
 }
 type HotInfoRecord struct {
 	HotInfo
-	Hour string `json:"hour"`
+	Index int    `json:"index"`
+	Hour  string `json:"hour"`
 }
 
 const dayLayout = "2006-01-02"
 const hourLayout = "2006-01-02_15"
-const weibohostspotCol = "weibohostspot"
-const hotwordCol = "hotword"
+const weibohostspotCol = "weibohostspot2"
+const hotwordCol = "hotword2"
 
 func GetWeiboHotTopic() {
 	getUrl := "http://api.tianapi.com/txapi/weibohot/index?key=26b1f3800f766b36270aaf7ec734cbac"
@@ -51,10 +51,10 @@ func GetWeiboHotTopic() {
 	}
 	var allWords = make(map[string]WordInfo)
 	var month = time.Now().Format("2006-01")
-	for _, one := range respData.NewsList {
+	for i, one := range respData.NewsList {
 		record.HotInfo = one
+		record.Index = i
 		words := sentenceParse(record.HotWord)
-		fmt.Println("words", words)
 		recodes = append(recodes, record)
 		for _, one := range words {
 			wordInfo, ok := allWords[one]

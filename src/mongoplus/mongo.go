@@ -108,40 +108,26 @@ func (m *MgoDB) InsertReport(reportCol string, reportData interface{}) int {
 	return cm.Success
 }
 
-func (m *MgoDB) AddWord(reportCol string, word string) (err error) {
-	var currentCnt int
-	newSession := m.Session.Copy()
-	defer newSession.Close()
-	month := time.Now().Format("2006-01")
-	c := newSession.DB(cf.SysConfig.MongoDB["1"].DBName).C(reportCol)
-	filter := bson.M{"word": word, "month": month}
-	var result map[string]interface{}
-	err = c.Find(filter).One(&result)
-	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			currentCnt = 0
-		} else {
-			return
-		}
-	} else {
-		currentCnt = cm.MustInt(result["count"])
-	}
-	data := map[string]interface{}{
-		"count": currentCnt + 1,
-		"word":  word, "month": month,
-	}
-	_, err = c.Upsert(filter, data)
-	if err != nil {
-		return
-	}
-	return
-}
-
 func (m *MgoDB) QueryOne(dataCol string, filter bson.M) (result map[string]interface{}, err error) {
 	newSession := m.Session.Copy()
 	defer newSession.Close()
 	c := newSession.DB(cf.SysConfig.MongoDB["1"].DBName).C(dataCol)
 	err = c.Find(filter).One(&result)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, nil
+		} else {
+			return
+		}
+	}
+	return
+}
+
+func (m *MgoDB) Query(dataCol string, filter bson.M, sort string, limit int) (result []map[string]interface{}, err error) {
+	newSession := m.Session.Copy()
+	defer newSession.Close()
+	c := newSession.DB(cf.SysConfig.MongoDB["1"].DBName).C(dataCol)
+	err = c.Find(filter).Sort(sort).Limit(limit).All(&result)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			return nil, nil

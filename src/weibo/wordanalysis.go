@@ -42,3 +42,8 @@ func (w *WordInfo) UpdateCurrentCount() {
 	}
 	return
 }
+
+func GetTopWord(month string) (result []map[string]interface{}, err error) {
+	filter := bson.M{"month": month}
+	return mongoplus.MgoEntry.Query(hotwordCol, filter, "-count", 50)
+}
